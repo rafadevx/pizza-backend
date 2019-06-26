@@ -8,11 +8,14 @@ const routes = express.Router()
 const adminAuthMiddleware = require('./app/middlewares/adminAuth')
 
 const UserController = require('./app/controllers/UserController')
+const FileController = require('./app/controllers/FileController')
 const SessionController = require('./app/controllers/SessionController')
 const ProductController = require('./app/controllers/ProductController')
 const ProductTypeController = require('./app/controllers/ProductTypeController')
 const ProductTypeSizeController = require('./app/controllers/ProductTypeSizeController')
 const OrderController = require('./app/controllers/OrderController')
+
+routes.get('/files/:file', FileController.show)
 
 // Signin, Signup routes
 routes.post('/signup', UserController.store)
