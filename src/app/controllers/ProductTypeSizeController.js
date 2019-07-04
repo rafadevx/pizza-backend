@@ -21,7 +21,13 @@ class ProductTypeSizeController {
     const productTypeSizes = await ProductTypeSize.findAll({
       where: {
         product_type_id: productType
-      }
+      },
+      include: [
+        {
+          model: ProductType,
+          attributes: ['name', 'image']
+        }
+      ]
     })
 
     return res.json(productTypeSizes)

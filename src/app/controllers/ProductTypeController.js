@@ -1,4 +1,4 @@
-const { ProductType } = require('../models')
+const { ProductType, Product } = require('../models')
 
 class ProductTypeController {
   async store (req, res) {
@@ -20,7 +20,13 @@ class ProductTypeController {
     const productTypes = await ProductType.findAll({
       where: {
         product_id: product
-      }
+      },
+      include: [
+        {
+          model: Product,
+          attributes: ['name']
+        }
+      ]
     })
 
     return res.json(productTypes)
