@@ -4,7 +4,7 @@ const upload = require('multer')(multerConfig)
 
 const routes = express.Router()
 
-// const authMiddleware = require('./app/middlewares/auth')
+const authMiddleware = require('./app/middlewares/auth')
 const adminAuthMiddleware = require('./app/middlewares/adminAuth')
 
 const UserController = require('./app/controllers/UserController')
@@ -43,8 +43,8 @@ routes.get('/app/productTypeSize/:productType', ProductTypeSizeController.index)
 routes.get('/app/productTypeSize/show/:id', ProductTypeSizeController.show)
 
 // Order routes
-routes.post('/app/order/:id', OrderController.store)
+routes.post('/app/order/', authMiddleware, OrderController.store)
 routes.get('/app/order/', adminAuthMiddleware, OrderController.index)
-routes.get('/app/order/user/:id', OrderController.userIndex)
+routes.get('/app/order/user/', authMiddleware, OrderController.userIndex)
 
 module.exports = routes

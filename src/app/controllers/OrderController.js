@@ -1,4 +1,12 @@
-const { Order, OrderItem, ProductTypeSize, User } = require('../models')
+const {
+  Order,
+  OrderItem,
+  ProductType,
+  ProductTypeSize,
+  User
+} = require('../models')
+const { formatRelative } = require('date-fns')
+const pt = require('date-fns/locale/pt')
 
 class OrderController {
   constructor () {
@@ -15,8 +23,12 @@ class OrderController {
       return {
         id: order.id,
         createdAt: order.createdAt,
+        formattedDate: formatRelative(new Date(order.createdAt), new Date(), {
+          locale: pt
+        }),
         total,
-        user: order.user ? order.User.name : '',
+        note: order.note,
+        user: order.User ? order.User.name : '',
         OrderItems: order.OrderItems
       }
     })
@@ -24,13 +36,13 @@ class OrderController {
 
   async store (req, res) {
     const { zipcode, streetAddress, district, note, items } = req.body
-    const { id } = req.params
+    const { userId } = req
     const order = await Order.create({
       zipcode,
       streetAddress,
       district,
       note,
-      user_id: id
+      user_id: userId
     })
 
     if (order) {
@@ -42,11 +54,14 @@ class OrderController {
       })
     }
 
+    req.io.emit('order', 'new')
+
     return res.json(order)
   }
 
   async index (req, res) {
     const orders = await Order.findAll({
+      order: [['createdAt', 'DESC']],
       include: [
         {
           model: User,
@@ -57,7 +72,13 @@ class OrderController {
           attributes: ['product_type_size_id'],
           include: [
             {
-              model: ProductTypeSize
+              model: ProductTypeSize,
+              include: [
+                {
+                  model: ProductType,
+                  attributes: ['name', 'image']
+                }
+              ]
             }
           ]
         }
@@ -71,10 +92,11 @@ class OrderController {
   }
 
   async userIndex (req, res) {
-    const { id } = req.params
+    const { userId } = req
     const orders = await Order.findAll({
+      order: [['createdAt', 'DESC']],
       where: {
-        user_id: id
+        user_id: userId
       },
       include: [
         {
